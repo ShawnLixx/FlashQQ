@@ -21,7 +21,7 @@ class webQQ:
 
 		self.msg_id = 65450001
 		self.t = 1459950706179
-
+		
 	#hash algorithm, it'll be used while getting friends list etc. 
 	def hash(b, j):
 		a = [0,0,0,0]  
@@ -198,7 +198,9 @@ class webQQ:
 			self.results = json.loads(self.r.text)
 		except:
 			return 0
-		if not results.has_key("errmsg"):
+		if results.has_key("errmsg"):
+			return 1
+		else:
 			self.results = json.loads(self.r.text)["result"]
 		self.messages = []
 		for result in self.results:
