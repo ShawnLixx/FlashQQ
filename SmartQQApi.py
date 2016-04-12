@@ -23,7 +23,7 @@ class webQQ:
 		self.t = 1459950706179
 		
 	#hash algorithm, it'll be used while getting friends list etc. 
-	def hash(b, j):
+	def hash(self, b, j):
 		a = [0,0,0,0]  
 		for i in range(0,len(j)):  
 			a[i%4] ^= ord(j[i])  
@@ -118,12 +118,12 @@ class webQQ:
 		#get friends list
 		self.getFriendsListUrl = '''http://s.web2.qq.com/api/get_user_friends2'''
 		self.session.headers["Referer"] = '''http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1'''
-		self.rFriendsData = {"vfwebqq": self.vfwebqq, "hash": hash(self.uin, self.ptwebqq)}
+		self.rFriendsData = {"vfwebqq": self.vfwebqq, "hash": self.hash(self.uin, self.ptwebqq)}
 		self.requestData["r"] = json.dumps(self.rFriendsData)
 		self.r = self.session.post(url = self.getFriendsListUrl, data = self.requestData)
 		if self.r.status_code != 200:
 			return 0
-		self.friendsList = self.json.loads(self.r.text)
+		self.friendsList = json.loads(self.r.text)
 		if self.friendsList["retcode"] != 0:
 			return 0
 
@@ -134,9 +134,9 @@ class webQQ:
 			self.friends[info["uin"]]["nick"] = info["nick"]
 		for mark in self.friendsList['result']['marknames']:
 			self.friends[mark["uin"]]["markname"] = mark["markname"]
-		for vipinfo in friendsList['result']['vipinfo']:
+		'''for vipinfo in self.friendsList['result']['vipinfo']:
 			self.friends[vipinfo["u"]]["vipinfo"]["is_vip"] = vipinfo["is_vip"]
-			self.friends[vipinfo["u"]]["vipinfo"]["vip_level"] = vipinfo["vip_level"]
+			self.friends[vipinfo["u"]]["vipinfo"]["vip_level"] = vipinfo["vip_level"]'''
 		for info in self.friendsList["result"]["friends"]:
 			self.friends[info["uin"]]["categories"] = info["categories"]
 		self.friendsList["result"]["categories"].sort(key = lambda x:x['sort'])
@@ -226,11 +226,11 @@ class webQQ:
 
 	#return 1 when sent succeed, 0 otherwise
 	def	sendMsgFriend(self, toUin, content):
-		sendMsgFriendUrl = '''http://d1.web2.qq.com/channel/send_buddy_msg2'''
+		self.sendMsgFriendUrl = '''http://d1.web2.qq.com/channel/send_buddy_msg2'''
 		self.session.headers["Referer"] = '''http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2'''
-		self.sendData = {"to": toUin, "content": content, "face": 459, "clientid": self.clientid, "msg_id": self.msg_id, "psessionid": psessionid}
+		self.sendData = '{\"to\": '+ str(toUin) + ', \"content\": \"' + content + '\", \"face\": 459, \"clientid\": ' + str(self.clientid) + ', \"msg_id\": ' + str(self.msg_id) + ', \"psessionid\": \"' + str(self.psessionid) + '\"}'
 		self.sendRequest = {}
-		self.sendRequest['r'] = json.dumps(self.sendData)
+		self.sendRequest['r'] = self.sendData
 		self.sendR = self.session.post(url = self.sendMsgFriendUrl, data = self.sendRequest)
 		self.R = json.loads(self.sendR.text)
 		if self.R.has_key("msg"):
@@ -240,11 +240,11 @@ class webQQ:
 
 	#return 1 when sent succeed, 0 otherwise
 	def	sendMsgGroup(self, toGid, content):
-		sendMsgGroupUrl = '''http://d1.web2.qq.com/channel/send_qun_msg2'''
+		self.sendMsgGroupUrl = '''http://d1.web2.qq.com/channel/send_qun_msg2'''
 		self.session.headers["Referer"] = '''http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2'''
-		self.sendData = {"group_uin": toGid, "content": content, "face": 459, "clientid": self.clientid, "msg_id": self.msg_id, "psessionid": psessionid}
+		self.sendData = '{\"group_uin\": '+ str(toUin) + ', \"content\": \"' + content + '\", \"face\": 459, \"clientid\": ' + str(self.clientid) + ', \"msg_id\": ' + str(self.msg_id) + ', \"psessionid\": \"' + str(self.psessionid) + '\"}'
 		self.sendRequest = {}
-		self.sendRequest['r'] = json.dumps(self.sendData)
+		self.sendRequest['r'] = self.sendData
 		self.sendR = self.session.post(url = self.sendMsgGroupUrl, data = self.sendRequest)
 		self.R = json.loads(self.sendR.text)
 		if self.R.has_key("msg"):
@@ -254,11 +254,11 @@ class webQQ:
 
 	#return 1 when sent succeed, 0 otherwise
 	def	sendMsgDiscuss(self, toDid, content):
-		sendMsgDiscussUrl = '''http://d1.web2.qq.com/channel/send_qun_msg2'''
+		self.sendMsgDiscussUrl = '''http://d1.web2.qq.com/channel/send_qun_msg2'''
 		self.session.headers["Referer"] = '''http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2'''
-		self.sendData = {"did": toDid, "content": content, "face": 459, "clientid": self.clientid, "msg_id": self.msg_id, "psessionid": psessionid}
+		self.sendData = '{\"did\": '+ str(toUin) + ', \"content\": \"' + content + '\", \"face\": 459, \"clientid\": ' + str(self.clientid) + ', \"msg_id\": ' + str(self.msg_id) + ', \"psessionid\": \"' + str(self.psessionid) + '\"}'
 		self.sendRequest = {}
-		self.sendRequest['r'] = json.dumps(self.sendData)
+		self.sendRequest['r'] = self.sendData
 		self.sendR = self.session.post(url = self.sendMsgDiscussUrl, data = self.sendRequest)
 		self.R = json.loads(self.sendR.text)
 		if self.R.has_key("msg"):
@@ -269,7 +269,7 @@ class webQQ:
 	#get online info only online user will be shown in this dict
 	def getOnlinInfo(self):
 		self.getOnlinInfoUrl = '''http://d1.web2.qq.com/channel/get_online_buddies2'''
-		self.requestData = {'vfwebqq': self.vfwebqq, 'clientid': self.clientid, 'psessionid': psessionid, 't': self.t}
+		self.requestData = {'vfwebqq': self.vfwebqq, 'clientid': self.clientid, 'psessionid': self.psessionid, 't': self.t}
 		self.session.headers['Referer'] = '''http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2'''
 		self.r = self.session.get(url = self.getOnlinInfoUrl, data = self.requestData)
 		if self.r.status_code != 200:
@@ -375,7 +375,7 @@ class webQQ:
 	#return discussinfo, return 0 when failed
 	def getDiscussInfo(self, did):
 		self.getDiscussInfoUrl = '''http://d1.web2.qq.com/channel/get_discu_info'''
-		self.sendData = {'did': did, 'vfwebqq': self.vfwebqq, 't': self.t, 'clientid': self.clientid, 'psessionid': psessionid}
+		self.sendData = {'did': did, 'vfwebqq': self.vfwebqq, 't': self.t, 'clientid': self.clientid, 'psessionid': self.psessionid}
 		self.session.headers['Referer'] = '''http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2'''
 		self.r = self.session.get(url = self.getDiscussInfoUrl, data = self.sendData)
 		if self.r.status_code != 200:
