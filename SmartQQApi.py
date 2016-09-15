@@ -185,7 +185,7 @@ class webQQ:
 
 
 	#return a list of messages(a dict), contains 'uin'(the uin of senders), 'type'(str, 'group', 'discuss' or 'friend'), 'time', 'content'
-	def getMessages():
+	def getMessages(self):
 
 		self.getMessagesUrl = '''http://d1.web2.qq.com/channel/poll2'''
 		self.rData['psessionid'] = self.psessionid
@@ -198,7 +198,7 @@ class webQQ:
 			self.results = json.loads(self.r.text)
 		except:
 			return 0
-		if results.has_key("errmsg"):
+		if self.results.has_key("errmsg"):
 			return 1
 		else:
 			self.results = json.loads(self.r.text)["result"]
@@ -209,19 +209,19 @@ class webQQ:
 			message["font"] = result["value"]["content"][0][1]
 			message["time"] = result["value"]["time"]
 			message["content"] = ""
+			if result["poll_type"] == "message":
+				message["type"] = "friend"
+			elif result["poll_type"] == "group_message":
+				message["type"] = "group"
+			elif result["poll_type"] == "discu_message":
+				message["type"] = "discuss"
 			for item in result["value"]["content"]:
-				if item["poll_type"] == "message":
-					message["type"] = "friend"
-				elif item["poll_type"] == "group_message":
-					message["type"] = "group"
-				elif item["poll_type"] == "discu_message":
-					message["type"] = "discuss"
 				if isinstance(item, unicode):
 					message["content"] = message["content"] + item
 				elif isinstance(item, list):
 					if isinstance(item[1], int):
 						message["content"] = message["content"] + '[face,' + item[1] + ']'
-			self.messages.add(message)
+			self.messages.append(message)
 		return self.messages
 
 	#return 1 when sent succeed, 0 otherwise
